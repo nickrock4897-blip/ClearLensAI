@@ -6,6 +6,7 @@ on:
     paths:
       - ".github/workflows/build-apk.yml"
       - "archive/**"
+      - "patches/**"
       - "README.md"
   workflow_dispatch:
 
