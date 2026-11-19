@@ -56,6 +56,8 @@ jobs:
           base64 --decode "$RUNNER_TEMP/music-background.patch.gz.b64" | gunzip > "$RUNNER_TEMP/music-background.patch"
           cd "$RUNNER_TEMP/source/WeihnachtsferienCountdown"
           patch --batch -p1 < "$RUNNER_TEMP/music-background.patch"
+          sed -i "s/:1.10.1/:1.9.4/g" app/build.gradle
+          grep "media3-" app/build.gradle
 
       - name: Generate original offline Christmas MP3 tracks
         working-directory: ${{ runner.temp }}/source/WeihnachtsferienCountdown
