@@ -52,6 +52,17 @@ jobs:
           cd "$RUNNER_TEMP/source/WeihnachtsferienCountdown"
           patch --batch -p1 < "$RUNNER_TEMP/music-player.patch"
 
+      - name: Package restored source for one-time inspection
+        run: tar -czf "$RUNNER_TEMP/WeihnachtsferienCountdown-source.tar.gz" -C "$RUNNER_TEMP/source" WeihnachtsferienCountdown
+
+      - name: Upload one-time source inspection artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-inspection
+          path: ${{ runner.temp }}/WeihnachtsferienCountdown-source.tar.gz
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Build debug APK
         working-directory: ${{ runner.temp }}/source/WeihnachtsferienCountdown
         run: gradle --no-daemon --stacktrace assembleDebug
