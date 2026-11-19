@@ -58,6 +58,8 @@ jobs:
           patch --batch -p1 < "$RUNNER_TEMP/music-background.patch"
           sed -i "s/:1.10.1/:1.9.4/g" app/build.gradle
           grep "media3-" app/build.gradle
+          sed -i "s/fun setVolume(value: Float)/fun updateVolume(value: Float)/" app/src/main/java/de/nickrock/weihnachtscountdown/LocalAudioPlayer.kt
+          sed -i "s/player::setVolume/player::updateVolume/" app/src/main/java/de/nickrock/weihnachtscountdown/MainActivity.kt
 
       - name: Generate original offline Christmas MP3 tracks
         working-directory: ${{ runner.temp }}/source/WeihnachtsferienCountdown
