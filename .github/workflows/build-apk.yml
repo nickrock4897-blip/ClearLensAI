@@ -2,7 +2,7 @@ name: Build Weihnachtsferien Countdown APK
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "music-service-enhancement" ]
     paths:
       - ".github/workflows/build-apk.yml"
       - "archive/**"
@@ -52,6 +52,28 @@ jobs:
           cd "$RUNNER_TEMP/source/WeihnachtsferienCountdown"
           patch --batch -p1 < "$RUNNER_TEMP/music-player.patch"
 
+      - name: Apply built-in background music feature
+        run: |
+          cat patches/music-background-part-*.b64 > "$RUNNER_TEMP/music-background.patch.gz.b64"
+          base64 --decode "$RUNNER_TEMP/music-background.patch.gz.b64" | gunzip > "$RUNNER_TEMP/music-background.patch"
+          cd "$RUNNER_TEMP/source/WeihnachtsferienCountdown"
+          patch --batch -p1 < "$RUNNER_TEMP/music-background.patch"
+          sed -i "s/:1.10.1/:1.9.4/g" app/build.gradle
+          sed -i "s/fun setVolume(value: Float)/fun updateVolume(value: Float)/" app/src/main/java/de/nickrock/weihnachtscountdown/LocalAudioPlayer.kt
+          sed -i "s/player::setVolume/player::updateVolume/" app/src/main/java/de/nickrock/weihnachtscountdown/MainActivity.kt
+
+      - name: Generate and verify original offline Christmas music
+        working-directory: ${{ runner.temp }}/source/WeihnachtsferienCountdown
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg python3-numpy
+          /usr/bin/python3 tools/generate_music.py
+          test "$(find app/src/main/res/raw -maxdepth 1 -name '*.mp3' | wc -l)" -eq 9
+          for track in app/src/main/res/raw/*.mp3; do
+            ffmpeg -v error -i "$track" -f null -
+          done
+          du -sh app/src/main/res/raw
+
       - name: Build debug APK
         working-directory: ${{ runner.temp }}/source/WeihnachtsferienCountdown
         run: gradle --no-daemon --stacktrace assembleDebug
@@ -61,6 +83,9 @@ jobs:
           APK="$RUNNER_TEMP/source/WeihnachtsferienCountdown/app/build/outputs/apk/debug/app-debug.apk"
           test -s "$APK"
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | head -n 5
+          for track in winterlichter schneeflockentanz adventskerzen winterabend sternenglanz gemuetlichezeit schlittenfahrt weihnachtsmorgen tannenduft; do
+            "$ANDROID_HOME/build-tools/35.0.0/aapt" list "$APK" | grep -q "res/raw/$track.mp3"
+          done
           sha256sum "$APK"
 
       - name: Upload APK artifact

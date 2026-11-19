@@ -12,15 +12,15 @@ Open **Actions → Build Weihnachtsferien Countdown APK** and download the lates
 - Weekly Monday reminder at a configurable local time; reboot and time-change re-scheduling.
 - Ten Christmas themes with saved selection and reduced-motion option.
 - Snow animation.
-- Local music picker for audio files chosen by the user with Android's document picker.
-- Mini-player stays visible above the bottom navigation while moving through Home, Music, Themes, Location, and Settings.
-- Mini-player controls: track title, play/pause, stop, previous/next, seek slider, elapsed time, track duration, and remaining time.
-- Imported file references are stored locally on the device.
+- Nine original Christmas instrumental MP3 tracks bundled in the APK and available offline.
+- Background playback handled by one Android Media3 media session service; playback continues when navigating between Home, Music, Themes, Location, and Settings.
+- Persistent mini-player above the bottom navigation with current title, play/pause, stop, previous/next, seek, elapsed/remaining/duration, and volume slider.
+- Android media session notification and lock-screen controls while music is playing.
+- Last selected track and volume are saved locally.
+- Additional audio files can still be imported with Android's document picker; original imported file references remain local to the device.
 
 ## Music and licensing
-The APK does not contain the commercial recordings provided in the chat or any other copyrighted music copies. Choose audio files already stored on your phone under **Musik → Musik vom Gerät auswählen**. The app stores only the selected file references and reads them locally.
-
-Playback continues while navigating inside the app. This version is not a foreground media service, so it does not guarantee playback after leaving the app, locking the phone, or process termination. Android notification and lock-screen media controls, shuffle, repeat, and volume control are not included.
+The nine bundled instrumentals are newly generated for this app by `tools/generate_music.py`. They do not use the commercial recordings uploaded in the chat, samples, or copied melodies. Those commercial artist recordings are not included in the APK. The generated music is encoded as MP3 resources and can be played without an internet connection.
 
 ## Holiday data
 - Main source: [Kultusministerkonferenz (KMK) holiday calendar](https://www.kmk.org/service/ferienregelung/ferienkalender.html)
@@ -29,11 +29,12 @@ Playback continues while navigating inside the app. This version is not a foregr
 - Future dates without verified official sources are not invented; manual entry is available.
 
 ## Build
-GitHub Actions reconstructs the archived base project, applies `patches/music-player.patch.gz.b64`, runs `gradle assembleDebug`, checks the APK package metadata and SHA-256, and uploads the APK artifact.
+GitHub Actions reconstructs the archived base project, applies the original local music picker patch and the isolated background-music patch, generates nine MP3 resources, runs `gradle assembleDebug`, verifies the APK contains all nine audio resources, and uploads the APK artifact.
 
 ## Verification and limitations
-- CI build, package metadata check, and artifact upload passed.
+- CI verified all nine generated MP3 files by decoding them with FFmpeg, compiled the Android project successfully, checked the APK contains each of the nine MP3 resources, and uploaded the APK artifact.
 - minSdk 26; target/compile SDK 35.
+- Uses Media3 1.9.4 to retain compile SDK 35 compatibility.
 - Debug-signed APK only; a signed release requires a user-owned keystore configured with GitHub Secrets.
-- Playback has not been tested on a physical Android device. Actual audio codec support can vary by device.
+- Playback has not yet been tested on a physical Android device. Actual audio behavior may vary by device.
 - The GitHub repository is public. Do not store credentials, signing keys, or personal data in it.
